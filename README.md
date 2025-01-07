@@ -1,2 +1,3 @@
-# gm0ess
-GM/ES SOTA Society site
+# GM/ES SOTA Society
+
+Amateur radio club, callsign GM0ESS
