@@ -1,0 +1,151 @@
+---
+title: "🏔️ Cairngorm Climber's Award 🏆"
+format:
+  html:
+    css:
+      - https://unpkg.com/leaflet@1.9.4/dist/leaflet.css
+execute:
+  echo: false
+---
+
+Brought to you by the GM/ES club!
+
+There are 82 summits in the Cairngorms National Park, and you can explore them here:
+
+## Cairngorm SOTA Summits
+
+```{ojs}
+L = require('leaflet@1.9.4')
+
+// Load the GeoJSON file
+geojson = FileAttachment("cairngorms.geojson").json()
+
+// Load the CSV file
+summits = FileAttachment("cairngorms_summits.csv").csv({typed: true})
+
+// Function to get a colored marker icon based on value
+function getColor(value) {
+  switch (value) {
+    case 1: return "DarkGreen";
+    case 2: return "LimeGreen";
+    case 4: return "Olive";
+    case 6: return "Orange";
+    case 8: return "OrangeRed";
+    case 10: return "Red";
+    default: return "Gray"; // Default color for undefined values
+  }
+}
+
+map = {
+  let container = DOM.element('div', { style: `width:${width}px;height:${width/1.6}px` });
+  yield container;
+
+  let map = L.map(container).setView([57.07, -3.7], 8.5);
+  let osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  // Add the GeoJSON layer
+  L.geoJSON(geojson).addTo(map);
+
+  // Add summit markers
+  summits.forEach(({ latitude, longitude, points, name, summitCode }) => {
+      L.circleMarker([+latitude, +longitude], {
+        radius: 8,
+        color: getColor(points), // Use the color function
+        fillColor: getColor(points),
+        fillOpacity: 0.8
+      }).bindPopup(`Summit: ${name}<br>Reference: <a href="https://sotl.as/summits/${summitCode}" target="_blank">${summitCode}</a><br>Points: ${points}`)
+      .addTo(map);
+  });
+
+}
+
+```
+
+## Awards
+
+We've created an award scheme for activating summits within the park. The awards are:
+
+|         Award          | Number of Summits Activated | Picture |
+|:----------------------:|:---------------------------:|:-------:|
+|     Heather Hopper     |              1              |         |
+|   Ptarmigan Pioneer    |              5              |         |
+| Capercaillie Conqueror |             10              |         |
+|    Osprey Outlander    |             41              |         |
+| Golden Eagle Explorer  |             82              |         |
+
+## Roll of Honour
+
+```{ojs}
+//| echo: false
+// awardsData = FileAttachment("sota_awards_summary.csv").csv({ typed: true })
+awardsData = FileAttachment("sota_awards_summary.json").json();
+```
+
+```{ojs}
+//| echo: false
+viewof awardsfilter = Inputs.search(awardsData, {placeholder: "Search Callsign", autocomplete: true})
+
+Inputs.table(awardsfilter, {
+      columns: [
+        "Callsign",
+        "SummitsActivated",
+        "Award",
+        "AwardDate"
+      ],
+      header: {
+        Callsign: "Operator",
+        SummitsActivated: "Total Summits Activated",
+        Award: "Highest Award Achieved",
+        AwardDate: "Date of Award"
+      },
+      sort: "SummitsActivated", reverse: true,
+      multiple: false
+})
+
+```
+
+List of remaining summits:
+
+```{ojs}
+selectedAwardData
+  ? Inputs.table(selectedAwardData.RemainingSummits, {
+      columns: [
+        "summitCode",
+        "points"
+      ],
+      header: {
+        summitCode: "Summit Code",
+        points: "Points"
+      },
+      sort: "points",
+      reverse: true
+    })
+  : "Select a row in the above table to view details.";
+```
+
+```{ojs}
+Inputs.table(awardsfilter, {
+    columns: [
+      "RemainingSummits"
+  ],
+  header: {
+    RemainingSummits: "Activate these for Golden Eagle!",
+  },
+  sort: "Callsign",
+  required: false,
+})
+```
+
+
+## Misc
+
+![Award logo ideas](awards.jpg){fig-align="center"}
+
+
+## testing
+
+
+
+
