@@ -1,0 +1,44 @@
+---
+title: Computing awards
+---
+
+Load data from SOTA API
+```{python}
+import pandas as pd
+import requests
+import json
+from datetime import datetime
+
+# Load summit data from CSV
+summits_df = pd.read_csv('cairngorms_summits.csv')
+summit_codes = summits_df['summitCode'].tolist()
+
+# Function to fetch activations from SOTA API
+def fetch_activations(summit_code):
+    url = f"https://api-db2.sota.org.uk/api/activations/{summit_code}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Failed to fetch data for {summit_code}: {response.status_code}")
+        return []
+
+# Collect activation data
+activation_data = []
+
+for summit_code in summit_codes:
+    data = fetch_activations(summit_code)
+    for entry in data:
+        activation_data.append({
+            'summitCode': summit_code,
+            'UserId': entry['userId'],
+            'Callsign': entry['ownCallsign'],
+            'ActivationDate': datetime.strptime(entry['activationDate'], '%Y-%m-%dT%H:%M:%SZ'),
+        })
+
+# Create DataFrame from activation data
+activations_df = pd.DataFrame(activation_data)
+
+```
+
+
